@@ -15,7 +15,7 @@ export function Posts() {
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedPost, setSelectedPost] = useState(null);
 
-  const { data = [] } = useQuery(['posts'], fetchPosts)
+  const { data = [] } = useQuery(['posts'], fetchPosts, { staleTime: 10000 })
 
   return (
     <>
