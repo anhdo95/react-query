@@ -1,3 +1,4 @@
+import { QueryClient } from '@tanstack/react-query';
 // import { createStandaloneToast } from '@chakra-ui/react';
 // import { theme } from '../theme';
 
@@ -14,5 +15,4 @@
 //   toast({ id, title, status: 'error', variant: 'subtle', isClosable: true });
 // }
 
-// to satisfy typescript until this file has uncommented contents
-export {};
+export default new QueryClient();
