@@ -1,7 +1,12 @@
-// @ts-nocheck
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 
 import { axiosInstance } from '../../../axiosInstance';
 import { queryKeys } from '../../../react-query/constants';
@@ -38,7 +43,6 @@ interface UseAppointments {
 //   3. track the state of the filter (all appointments / available appointments)
 //     3a. return the only the applicable appointments for the current monthYear
 export function useAppointments(): UseAppointments {
-  /** ****************** START 1: monthYear state *********************** */
   // get the monthYear for the current date (for default monthYear state)
   const currentMonthYear = getMonthYearDetails(dayjs());
 
@@ -51,17 +55,14 @@ export function useAppointments(): UseAppointments {
   function updateMonthYear(monthIncrement: number): void {
     setMonthYear((prevData) => getNewMonthYear(prevData, monthIncrement));
   }
-  /** ****************** END 1: monthYear state ************************* */
-  /** ****************** START 2: filter appointments  ****************** */
-  // State and functions for filtering appointments to show all or only available
-  const [showAll, setShowAll] = useState(false);
 
-  // We will need imported function getAvailableAppointments here
-  // We need the user to pass to getAvailableAppointments so we can show
-  //   appointments that the logged-in user has reserved (in white)
+  const [showAll, setShowAll] = useState(false);
   const { user } = useUser();
 
-  /** ****************** END 2: filter appointments  ******************** */
+  const selectFn = useCallback(
+    (appointments) => getAvailableAppointments(appointments, user),
+    [user],
+  );
 
   useEffect(() => {
     const nextMonthYear = getNewMonthYear(monthYear, 1);
@@ -75,6 +76,9 @@ export function useAppointments(): UseAppointments {
   const { data: appointments = {} } = useQuery(
     [queryKeys.appointments, monthYear.year, monthYear.month],
     () => getAppointments(monthYear.year, monthYear.month),
+    {
+      select: showAll ? undefined : selectFn,
+    },
   );
 
   return { appointments, monthYear, updateMonthYear, showAll, setShowAll };
