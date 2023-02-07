@@ -20,13 +20,13 @@ interface UseStaff {
 export function useStaff(): UseStaff {
   const [filter, setFilter] = useState('all');
 
-  const selectFn = useCallback(
+  const filterSelectFn = useCallback(
     (staff) => filterByTreatment(staff, filter),
     [filter],
   );
 
   const { data: staff = [] } = useQuery([queryKeys.staff], getStaff, {
-    select: filter === 'all' ? undefined : selectFn,
+    select: filter !== 'all' && filterSelectFn,
   });
 
   return { staff, filter, setFilter };

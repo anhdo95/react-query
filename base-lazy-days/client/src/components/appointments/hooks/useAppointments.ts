@@ -16,6 +16,12 @@ import { AppointmentDateMap } from '../types';
 import { getAvailableAppointments } from '../utils';
 import { getMonthYearDetails, getNewMonthYear, MonthYear } from './monthYear';
 
+// Options to apply on `useQuery` and `queryClient.prefetchQuery`
+const commonQueryOptions = {
+  staleTime: 1000 * 60 * 10, // 10 minutes
+  cacheTime: 1000 * 60 * 15, // 15 minutes
+};
+
 // for useQuery call
 async function getAppointments(
   year: string,
@@ -59,7 +65,7 @@ export function useAppointments(): UseAppointments {
   const [showAll, setShowAll] = useState(false);
   const { user } = useUser();
 
-  const selectFn = useCallback(
+  const availableSelectFn = useCallback(
     (appointments) => getAvailableAppointments(appointments, user),
     [user],
   );
@@ -70,6 +76,7 @@ export function useAppointments(): UseAppointments {
     queryClient.prefetchQuery(
       [queryKeys.appointments, nextMonthYear.year, nextMonthYear.month],
       () => getAppointments(nextMonthYear.year, nextMonthYear.month),
+      commonQueryOptions,
     );
   }, [monthYear]);
 
@@ -77,7 +84,12 @@ export function useAppointments(): UseAppointments {
     [queryKeys.appointments, monthYear.year, monthYear.month],
     () => getAppointments(monthYear.year, monthYear.month),
     {
-      select: showAll ? undefined : selectFn,
+      ...commonQueryOptions,
+      refetchOnMount: true,
+      refetchOnReconnect: true,
+      refetchOnWindowFocus: true,
+      refetchInterval: 1000 * 60, // a minute
+      select: !showAll && availableSelectFn,
     },
   );
 

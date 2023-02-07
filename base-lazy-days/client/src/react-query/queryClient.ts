@@ -19,7 +19,9 @@ function queryErrorHandler(error: unknown): void {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 10,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
     },
   },
   queryCache: new QueryCache({
@@ -27,6 +29,8 @@ const queryClient = new QueryClient({
   }),
 });
 
-queryClient.setQueryDefaults([queryKeys.treatments], { staleTime: 1000 * 60 });
+queryClient.setQueryDefaults([queryKeys.treatments], {
+  staleTime: 1000 * 60,
+});
 
 export default queryClient;
